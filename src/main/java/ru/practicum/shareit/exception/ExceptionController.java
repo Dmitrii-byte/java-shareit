@@ -13,21 +13,24 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class ExceptionController {
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        log.warn("Ресурс не найден: {}", e.getMessage());
         return new ErrorResponse("error", e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicatedDataException(final DuplicatedDataException e) {
+        log.warn("Дублирующиеся данные: {}", e.getMessage());
         return new ErrorResponse("error", e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ConditionsNotMetException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErrorResponse handleConditionsNotMetException(final ConditionsNotMetException e) {
+        log.warn("Условия не выполнены: {}", e.getMessage());
         return new ErrorResponse("error", e.getMessage());
     }
 
@@ -53,7 +56,7 @@ public class ExceptionController {
         return new ErrorResponse("Ошибка валидации входных данных", errorMessage);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
         String errorMessage = e.getConstraintViolations().stream()
@@ -65,5 +68,12 @@ public class ExceptionController {
                 .collect(Collectors.joining("; "));
         log.warn("Некорректное значение параметра: {}", errorMessage);
         return new ErrorResponse("Некорректное значение параметра ", errorMessage);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleAllUncaughtException(final Exception e) {
+        log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
+        return new ErrorResponse("Внутренняя ошибка сервера", "Произошла непредвиденная ошибка");
     }
 }

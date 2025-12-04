@@ -10,7 +10,6 @@ import lombok.Data;
 public class ItemDto {
     private Long id;
     @NotBlank(message = "не может быть пустым")
-    @NotNull(message = "должно быть")
     private String name;
     @NotBlank(message = "не может быть пустым")
     private String description;
