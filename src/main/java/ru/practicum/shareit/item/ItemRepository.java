@@ -14,6 +14,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "WHERE i.owner.id = :userId")
     List<Item> findByUserId(@Param("userId") long userId);
 
+    @Modifying
+    @Query("DELETE FROM Item i WHERE i.owner.id = :ownerId")
+    void deleteAllByOwnerId(@Param("ownerId") Long ownerId);
+
     @Query("SELECT i " +
             "FROM Item i " +
             "WHERE i.available = true " +
