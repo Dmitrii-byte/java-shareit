@@ -21,10 +21,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.mapToUserDtoList(repository.findAll());
+        return userMapper.mapToUserDtoList(repository.findAll());
     }
 
     @Override
@@ -45,12 +46,12 @@ public class UserServiceImpl implements UserService {
         }
 
         repository.save(exUser);
-        return UserMapper.mapToUserDto(exUser);
+        return userMapper.mapToUserDto(exUser);
     }
 
     @Override
     public Optional<UserDto> getUserById(long id) {
-        return repository.findById(id).map(UserMapper::mapToUserDto);
+        return repository.findById(id).map(userMapper::mapToUserDto);
     }
 
     @Override
@@ -60,8 +61,8 @@ public class UserServiceImpl implements UserService {
             throw new DuplicatedDataException("Этот email уже используется");
         }
 
-        User user = UserMapper.mapToUser(userDto);
-        return UserMapper.mapToUserDto(repository.save(user));
+        User user = userMapper.mapToUser(userDto);
+        return userMapper.mapToUserDto(repository.save(user));
     }
 
     @Override
