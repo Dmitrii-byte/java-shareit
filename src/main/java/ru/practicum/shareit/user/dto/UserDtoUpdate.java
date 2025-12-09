@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserDtoUpdate {
     private String email;
     private String name;

@@ -25,12 +25,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public Optional<UserDto> getUserById(@PathVariable @Positive long userId) {
+    public Optional<UserDto> getUserById(@PathVariable
+                                         @Positive(message = "id должен быть положительным") long userId) {
         return userService.getUserById(userId);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable @Positive long userId,
+    public UserDto updateUser(@PathVariable
+                              @Positive(message = "id должен быть положительным") long userId,
                               @RequestBody UserDtoUpdate userUpdate) {
         return userService.updateUser(userId, userUpdate);
     }
@@ -42,7 +44,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable @Positive long userId) {
+    public void deleteUser(@PathVariable
+                           @Positive(message = "id должен быть положительным") long userId) {
         userService.deleteUser(userId);
     }
 }
