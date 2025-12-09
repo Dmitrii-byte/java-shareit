@@ -28,6 +28,8 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     @Override
     public List<ItemResponseDto> getItemsByUserId(long userId) {
@@ -42,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .collect(Collectors.groupingBy(
                         comment -> comment.getItem().getId(),
-                        Collectors.mapping(CommentMapper::mapToCommentDto, Collectors.toList())
+                        Collectors.mapping(commentMapper::mapToCommentDto, Collectors.toList())
                 ));
 
         Map<Long, List<Booking>> lastBookingsMap = bookingRepository
@@ -70,7 +72,7 @@ public class ItemServiceImpl implements ItemService {
                     .orElse(null);
 
             List<CommentDto> comments = commentsMap.getOrDefault(item.getId(), List.of());
-            dtos.add(ItemMapper.mapToItemResponseDto(item, last, next, comments));
+            dtos.add(itemMapper.mapToItemResponseDto(item, last, next, comments));
         }
         return dtos;
     }
@@ -80,9 +82,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponseDto addNewItem(long userId, CreateItemDto itemDto) {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
-        Item item = ItemMapper.mapToItem(itemDto);
+        Item item = itemMapper.mapToItem(itemDto);
         item.setOwner(owner);
-        return ItemMapper.mapToItemResponseDto(repository.save(item), List.of());
+        return itemMapper.mapToItemResponseDto(repository.save(item), List.of());
     }
 
     @Override
@@ -92,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<CommentDto> comments = commentRepository.findByItemId(itemId)
                 .stream()
-                .map(CommentMapper::mapToCommentDto)
+                .map(commentMapper::mapToCommentDto)
                 .toList();
 
         LocalDateTime last = null;
@@ -122,7 +124,7 @@ public class ItemServiceImpl implements ItemService {
             last = lastBooking.map(Booking::getEnd).orElse(null);
             next = nextBooking.map(Booking::getStart).orElse(null);
         }
-        return ItemMapper.mapToItemResponseDto(item, last, next, comments);
+        return itemMapper.mapToItemResponseDto(item, last, next, comments);
     }
 
     @Override
@@ -148,10 +150,10 @@ public class ItemServiceImpl implements ItemService {
         Item updatedItem = repository.save(item);
         List<CommentDto> comments = commentRepository.findByItemId(itemId)
                 .stream()
-                .map(CommentMapper::mapToCommentDto)
+                .map(commentMapper::mapToCommentDto)
                 .toList();
 
-        return ItemMapper.mapToItemResponseDto(updatedItem, comments);
+        return itemMapper.mapToItemResponseDto(updatedItem, comments);
     }
 
     @Override
@@ -170,10 +172,10 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .collect(Collectors.groupingBy(
                         comment -> comment.getItem().getId(),
-                        Collectors.mapping(CommentMapper::mapToCommentDto, Collectors.toList())
+                        Collectors.mapping(commentMapper::mapToCommentDto, Collectors.toList())
                 ));
 
-        return ItemMapper.mapToItemResponseDto(items, commentsMap);
+        return itemMapper.mapToItemResponseDtoList(items, commentsMap);
     }
 
     @Override
@@ -192,10 +194,10 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Пользователь не брал данный предмет в аренду или аренда еще не завершена");
         }
 
-        Comment comment = CommentMapper.mapToComment(commentCreateDto, item, author);
+        Comment comment = commentMapper.mapToComment(commentCreateDto, item, author);
         Comment savedComment = commentRepository.save(comment);
 
-        return CommentMapper.mapToCommentDto(savedComment);
+        return commentMapper.mapToCommentDto(savedComment);
     }
 
     @Override
