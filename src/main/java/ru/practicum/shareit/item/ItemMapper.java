@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.experimental.UtilityClass;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,21 +13,42 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-@Mapper(componentModel = "spring", uses = {CommentMapper.class})
-public interface ItemMapper {
-    Item mapToItem(CreateItemDto itemDto);
+@UtilityClass
+public class ItemMapper {
 
-    @Mapping(target = "comments", source = "comments")
-    @Mapping(target = "lastBooking", source = "last")
-    @Mapping(target = "nextBooking", source = "next")
-    ItemResponseDto mapToItemResponseDto(Item item, LocalDateTime last,
-                                         LocalDateTime next, List<CommentDto> comments);
+    public static Item mapToItem(CreateItemDto itemDto) {
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        return item;
+    }
 
-    @Mapping(target = "comments", source = "comments")
-    @Mapping(target = "lastBooking", ignore = true)
-    @Mapping(target = "nextBooking", ignore = true)
-    ItemResponseDto mapToItemResponseDto(Item item, List<CommentDto> comments);
+    public static ItemResponseDto mapToItemResponseDto(Item item, LocalDateTime last,
+                                                       LocalDateTime next, List<CommentDto> comments) {
+        return new ItemResponseDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                comments,
+                last,
+                next
+        );
+    }
 
-    List<ItemResponseDto> mapToItemResponseDtoList(List<Item> items,
-                                                   @Context Map<Long, List<CommentDto>> commentsMap);
+    public static List<ItemResponseDto> mapToItemResponseDto(List<Item> items, Map<Long, List<CommentDto>> commentsMap) {
+        return items.stream()
+                .map(item -> mapToItemResponseDto(
+                        item,
+                        null,
+                        null,
+                        commentsMap.getOrDefault(item.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    public static ItemResponseDto mapToItemResponseDto(Item item, List<CommentDto> comments) {
+        return mapToItemResponseDto(item, null, null, comments);
+    }
 }

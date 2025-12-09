@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.item.ItemMapper;
@@ -11,14 +10,33 @@ import ru.practicum.shareit.user.UserMapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {ItemMapper.class, UserMapper.class})
-public interface BookingMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", constant = "WAITING")
-    Booking mapToBooking(CreateBookingDto dto, Item item, User booker);
+@UtilityClass
+public class BookingMapper {
 
-    @Mapping(target = "item", source = "item")
-    BookingDto mapToBookingDto(Booking booking);
+    public static Booking mapToBooking(CreateBookingDto dto, Item item, User booker) {
+        Booking booking = new Booking();
+        booking.setStart(dto.getStart());
+        booking.setEnd(dto.getEnd());
+        booking.setItem(item);
+        booking.setBooker(booker);
+        booking.setStatus(Status.WAITING);
+        return booking;
+    }
 
-    List<BookingDto> mapToBookingDtoList(List<Booking> bookings);
+    public static BookingDto mapToBookingDto(Booking booking) {
+        return new BookingDto(
+                booking.getId(),
+                booking.getStart(),
+                booking.getEnd(),
+                ItemMapper.mapToItemResponseDto(booking.getItem(), List.of()), // Комментарии пока не нужны
+                UserMapper.mapToUserDto(booking.getBooker()),
+                booking.getStatus()
+        );
+    }
+
+    public static List<BookingDto> mapToBookingDtoList(List<Booking> bookings) {
+        return bookings.stream()
+                .map(BookingMapper::mapToBookingDto)
+                .toList();
+    }
 }

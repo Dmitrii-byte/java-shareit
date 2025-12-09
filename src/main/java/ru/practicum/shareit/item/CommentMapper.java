@@ -1,23 +1,39 @@
 package ru.practicum.shareit.item;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = ItemMapper.class)
-public interface CommentMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "created", expression = "java(LocalDateTime.now())")
-    Comment mapToComment(CommentCreateDto dto, Item item, User author);
+@UtilityClass
+public class CommentMapper {
 
-    @Mapping(target = "authorName", source = "author.name")
-    CommentDto mapToCommentDto(Comment comment);
+    public static Comment mapToComment(CommentCreateDto dto, Item item, User author) {
+        return Comment.builder()
+                .text(dto.getText())
+                .item(item)
+                .author(author)
+                .created(LocalDateTime.now())
+                .build();
+    }
 
-    List<CommentDto> mapToCommentDtoList(List<Comment> comments);
+    public static CommentDto mapToCommentDto(Comment comment) {
+        return new CommentDto(
+                comment.getId(),
+                comment.getText(),
+                comment.getAuthor().getName(),
+                comment.getCreated()
+        );
+    }
+
+    public static List<CommentDto> mapToCommentDtoList(List<Comment> comments) {
+        return comments.stream()
+                .map(CommentMapper::mapToCommentDto)
+                .toList();
+    }
 }

@@ -22,7 +22,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final BookingMapper bookingMapper;
 
     @Override
     @Transactional
@@ -43,8 +42,8 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Дата окончания должна быть позже даты начала");
         }
 
-        Booking booking = bookingMapper.mapToBooking(dto, item, booker);
-        return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
+        Booking booking = BookingMapper.mapToBooking(dto, item, booker);
+        return BookingMapper.mapToBookingDto(bookingRepository.save(booking));
     }
 
     @Override
@@ -61,7 +60,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-        return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
+        return BookingMapper.mapToBookingDto(bookingRepository.save(booking));
     }
 
     @Override
@@ -76,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Доступ запрещён");
         }
 
-        return bookingMapper.mapToBookingDto(booking);
+        return BookingMapper.mapToBookingDto(booking);
     }
 
     @Override
@@ -102,26 +101,26 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now();
 
         return switch (state) {
-            case "ALL" -> bookingMapper.mapToBookingDtoList(bookings);
+            case "ALL" -> BookingMapper.mapToBookingDtoList(bookings);
             case "CURRENT" -> bookings.stream()
                     .filter(b -> !b.getStart().isAfter(now) && !b.getEnd().isBefore(now))
-                    .map(bookingMapper::mapToBookingDto)
+                    .map(BookingMapper::mapToBookingDto)
                     .toList();
             case "PAST" -> bookings.stream()
                     .filter(b -> b.getEnd().isBefore(now))
-                    .map(bookingMapper::mapToBookingDto)
+                    .map(BookingMapper::mapToBookingDto)
                     .toList();
             case "FUTURE" -> bookings.stream()
                     .filter(b -> b.getStart().isAfter(now))
-                    .map(bookingMapper::mapToBookingDto)
+                    .map(BookingMapper::mapToBookingDto)
                     .toList();
             case "WAITING" -> bookings.stream()
                     .filter(b -> b.getStatus() == Status.WAITING)
-                    .map(bookingMapper::mapToBookingDto)
+                    .map(BookingMapper::mapToBookingDto)
                     .toList();
             case "REJECTED" -> bookings.stream()
                     .filter(b -> b.getStatus() == Status.REJECTED || b.getStatus() == Status.CANCELED)
-                    .map(bookingMapper::mapToBookingDto)
+                    .map(BookingMapper::mapToBookingDto)
                     .toList();
             default -> throw new ValidationException("Unknown state: " + stateParam);
         };
