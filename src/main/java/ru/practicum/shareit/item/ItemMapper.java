@@ -1,9 +1,6 @@
 package ru.practicum.shareit.item;
 
 import lombok.experimental.UtilityClass;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;

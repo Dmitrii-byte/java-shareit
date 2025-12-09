@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import lombok.experimental.UtilityClass;
-import org.mapstruct.Mapper;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
