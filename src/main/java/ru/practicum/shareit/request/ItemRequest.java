@@ -1,10 +1,10 @@
 package ru.practicum.shareit.request;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.user.User;
 
 import java.time.Instant;
@@ -14,7 +14,6 @@ import java.time.Instant;
 @ToString
 @Entity
 @Table(name = "requests")
-@EqualsAndHashCode
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +29,16 @@ public class ItemRequest {
 
     @Column(name = "created_date")
     private Instant created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Booking)) return false;
+        return id != null && id.equals(((Booking) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
