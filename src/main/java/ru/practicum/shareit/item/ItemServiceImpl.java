@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public ItemResponseDto addNewItem(long userId, CreateItemDto itemDto) {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
@@ -177,7 +177,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public CommentDto addComment(long userId, long itemId, CommentCreateDto commentCreateDto) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
