@@ -1,10 +1,10 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.Hibernate;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
@@ -13,6 +13,7 @@ import ru.practicum.shareit.user.User;
 @ToString
 @Entity
 @Table(name = "items")
+@EqualsAndHashCode
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +36,4 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private ItemRequest request;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        return id != null && id.equals(((Item) o).getId());
-    }
 }

@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -15,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,11 +33,4 @@ public class Comment {
 
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        return id != null && id.equals(((Comment) o).getId());
-    }
 }

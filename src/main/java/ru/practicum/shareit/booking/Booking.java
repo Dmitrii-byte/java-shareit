@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 @Table(name = "bookings")
+@EqualsAndHashCode
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,11 +40,4 @@ public class Booking {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        return id != null && id.equals(((Booking) o).getId());
-    }
 }

@@ -1,16 +1,17 @@
 package ru.practicum.shareit.user;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.Hibernate;
 
 @Getter
 @Setter
 @ToString
 @Entity
 @Table(name = "users")
+@EqualsAndHashCode
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +23,4 @@ public class User {
 
     @Column(name = "name")
     private String name;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        return id != null && id.equals(((User) o).getId());
-    }
 }
