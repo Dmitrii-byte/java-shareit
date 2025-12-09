@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
@@ -12,6 +13,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "FROM Item i " +
             "WHERE i.owner.id = :userId")
     List<Item> findByUserId(@Param("userId") long userId);
+
+    @Modifying
+    @Query("DELETE FROM Item i WHERE i.owner.id = :ownerId")
+    void deleteAllByOwnerId(@Param("ownerId") Long ownerId);
 
     @Query("SELECT i " +
             "FROM Item i " +

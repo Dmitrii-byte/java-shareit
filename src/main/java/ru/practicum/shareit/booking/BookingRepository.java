@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -61,4 +62,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findNextBookingsForItems(@Param("itemIds") List<Long> itemIds,
                                            @Param("status") Status status,
                                            @Param("now") LocalDateTime now);
+
+    @Modifying
+    @Query("DELETE FROM Booking b WHERE b.booker.id = :bookerId")
+    void deleteAllByBookerId(@Param("bookerId") Long bookerId);
+
+    @Modifying
+    @Query("DELETE FROM Booking b WHERE b.item.id IN :itemIds")
+    void deleteAllByItemIdIn(@Param("itemIds") List<Long> itemIds);
 }

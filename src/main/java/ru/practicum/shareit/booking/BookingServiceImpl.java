@@ -24,6 +24,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final BookingMapper bookingMapper;
 
+    @Override
     @Transactional
     public BookingDto createBooking(long bookerId, CreateBookingDto dto) {
         User booker = userRepository.findById(bookerId)
@@ -46,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
     }
 
+    @Override
     @Transactional
     public BookingDto approveOrRejectBooking(long userId, long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -62,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.mapToBookingDto(bookingRepository.save(booking));
     }
 
+    @Override
     public BookingDto getBookingById(Long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
@@ -76,6 +79,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.mapToBookingDto(booking);
     }
 
+    @Override
     public List<BookingDto> getAllByBooker(long bookerId, String state) {
         userRepository.findById(bookerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
@@ -84,6 +88,7 @@ public class BookingServiceImpl implements BookingService {
         return filterBookings(bookings, state);
     }
 
+    @Override
     public List<BookingDto> getAllByOwner(long ownerId, String state) {
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
