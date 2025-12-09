@@ -3,12 +3,11 @@ package ru.practicum.shareit.user;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.CommentRepository;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoUpdate;
 
@@ -21,6 +20,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public UserDto updateUser(long userId, UserDtoUpdate userUpdate) {
         User exUser = repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public UserDto saveUser(UserDto userDto) {
         if (repository.existsByEmail(userDto.getEmail())) {
             throw new DuplicatedDataException("Этот email уже используется");
@@ -67,26 +67,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(long userId) {
-        repository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
-
-        List<Item> userItems = itemRepository.findByUserId(userId);
-        if (!userItems.isEmpty()) {
-            for (Item item : userItems) {
-
-                List<Booking> itemBookings = bookingRepository.findByItemId(item.getId());
-                if (!itemBookings.isEmpty()) {
-                    bookingRepository.deleteAll(itemBookings);
-                }
-            }
-            itemRepository.deleteAll(userItems);
+        if (!repository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
+        List<Long> userItemIds = itemRepository.findItemIdsByUserId(userId);
 
-        List<Booking> userBookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
-        if (!userBookings.isEmpty()) {
-            bookingRepository.deleteAll(userBookings);
+        if (!userItemIds.isEmpty()) {
+            commentRepository.deleteByItemIdIn(userItemIds);
+            bookingRepository.deleteByItemIdIn(userItemIds);
+            itemRepository.deleteByOwnerId(userId);
         }
-
+        bookingRepository.deleteByBookerId(userId);
         repository.deleteById(userId);
     }
 }
