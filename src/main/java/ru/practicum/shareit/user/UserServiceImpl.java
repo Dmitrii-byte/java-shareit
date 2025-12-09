@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public UserDto updateUser(long userId, UserDtoUpdate userUpdate) {
         User exUser = repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public UserDto saveUser(UserDto userDto) {
         if (repository.existsByEmail(userDto.getEmail())) {
             throw new DuplicatedDataException("Этот email уже используется");
