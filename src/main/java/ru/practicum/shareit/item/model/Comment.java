@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -36,8 +37,8 @@ public class Comment {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Comment)) return false;
-        return id != null && id.equals(((Comment) o).getId());
+        if (!(o instanceof Booking)) return false;
+        return id != null && id.equals(((Booking) o).getId());
     }
 
     @Override

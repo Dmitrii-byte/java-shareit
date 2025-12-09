@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.user.User;
 
 import java.time.Instant;
@@ -32,8 +33,8 @@ public class ItemRequest {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ItemRequest)) return false;
-        return id != null && id.equals(((ItemRequest) o).getId());
+        if (!(o instanceof Booking)) return false;
+        return id != null && id.equals(((Booking) o).getId());
     }
 
     @Override
