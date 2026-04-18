@@ -1,9 +1,13 @@
 package ru.practicum.shareit.user;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.CommentRepository;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoUpdate;
 
@@ -14,58 +18,66 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
+    private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.mapToItemDto(repository.findAll());
+        return UserMapper.mapToUserDtoList(repository.findAll());
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(long userId, UserDtoUpdate userUpdate) {
-        User exUser = repository.getUserById(userId)
+        User exUser = repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
-        if (emailExist(userUpdate.getEmail())) {
-            throw new DuplicatedDataException("Этот email уже используется");
-        }
-        if (userUpdate.getEmail() != null) {
+
+        if (userUpdate.getEmail() != null && !userUpdate.getEmail().equals(exUser.getEmail())) {
+            if (repository.existsByEmailAndIdNot(userUpdate.getEmail(), userId)) {
+                throw new DuplicatedDataException("Этот email уже используется другим пользователем");
+            }
             exUser.setEmail(userUpdate.getEmail());
         }
+
         if (userUpdate.getName() != null) {
             exUser.setName(userUpdate.getName());
         }
+
         repository.save(exUser);
         return UserMapper.mapToUserDto(exUser);
     }
 
     @Override
     public Optional<UserDto> getUserById(long id) {
-        return Optional.of(UserMapper.mapToUserDto(repository.getUserById(id).get()));
+        return repository.findById(id).map(UserMapper::mapToUserDto);
     }
 
     @Override
+    @Transactional
     public UserDto saveUser(UserDto userDto) {
-        if (emailExist(userDto.getEmail())) {
+        if (repository.existsByEmail(userDto.getEmail())) {
             throw new DuplicatedDataException("Этот email уже используется");
         }
-        return UserMapper.mapToUserDto(repository.save(UserMapper.mapToUser(userDto)));
+
+        User user = UserMapper.mapToUser(userDto);
+        return UserMapper.mapToUserDto(repository.save(user));
     }
 
     @Override
+    @Transactional
     public void deleteUser(long userId) {
-        if (userNotExist(userId)) {
-            throw new NotFoundException("Пользователь с " + userId + " не найден");
+        if (!repository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        repository.deleteUser(userId);
-    }
+        List<Long> userItemIds = itemRepository.findItemIdsByUserId(userId);
 
-    private boolean userNotExist(long userId) {
-        return repository.findAll().stream()
-                .noneMatch(u -> u.getId() == userId);
-    }
-
-    private boolean emailExist(String email) {
-        return repository.findAll().stream()
-                .anyMatch(users -> users.getEmail() != null &&
-                        users.getEmail().equals(email));
+        if (!userItemIds.isEmpty()) {
+            commentRepository.deleteByItemIdIn(userItemIds);
+            bookingRepository.deleteByItemIdIn(userItemIds);
+            itemRepository.deleteByOwnerId(userId);
+        }
+        bookingRepository.deleteByBookerId(userId);
+        repository.deleteById(userId);
     }
 }

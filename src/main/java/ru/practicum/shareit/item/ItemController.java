@@ -4,44 +4,46 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoUpdate;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
-@Validated
+@Valid
 public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> get(@RequestHeader("X-Sharer-User-Id")
-                             @Positive(message = "id должен быть положительным") long userId) {
-        return itemService.getItems(userId);
+    public List<ItemResponseDto> get(@RequestHeader("X-Sharer-User-Id")
+                                     @Positive(message = "id должен быть положительным") long userId) {
+        return itemService.getItemsByUserId(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto add(@RequestHeader("X-Sharer-User-Id")
-                       @Positive(message = "id должен быть положительным") long userId,
-                       @Valid @RequestBody ItemDto itemDto) {
+    public ItemResponseDto add(@RequestHeader("X-Sharer-User-Id")
+                               @Positive(message = "id должен быть положительным") long userId,
+                               @Valid @RequestBody CreateItemDto itemDto) {
         return itemService.addNewItem(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable @Positive(message = "id должен быть положительным") long itemId) {
-        return itemService.getItemById(itemId);
+    public ItemResponseDto getItemById(@RequestHeader("X-Sharer-User-Id")
+                                       @Positive(message = "id должен быть положительным") long userId,
+                                       @PathVariable
+                                       @Positive(message = "id должен быть положительным") long itemId) {
+        return itemService.getItemById(itemId, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                              @PathVariable
-                              @Positive(message = "id должен быть положительным") long itemId,
-                              @RequestBody ItemDtoUpdate itemUpdate) {
+    public ItemResponseDto updateItem(@RequestHeader("X-Sharer-User-Id")
+                                      @Positive(message = "id должен быть положительным") long userId,
+                                      @PathVariable
+                                      @Positive(message = "id должен быть положительным") long itemId,
+                                      @RequestBody ItemUpdateDto itemUpdate) {
         return itemService.updateItem(userId, itemId, itemUpdate);
     }
 
@@ -54,7 +56,15 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam(defaultValue = "") String text) {
+    public List<ItemResponseDto> searchItem(@RequestParam(defaultValue = "") String text) {
         return itemService.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PathVariable long itemId,
+            @Valid @RequestBody CommentCreateDto commentCreateDto) {
+        return itemService.addComment(userId, itemId, commentCreateDto);
     }
 }

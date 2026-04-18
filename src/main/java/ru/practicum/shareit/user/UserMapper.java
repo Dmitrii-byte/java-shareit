@@ -9,7 +9,7 @@ import java.util.List;
 public class UserMapper {
     public static User mapToUser(UserDto userDto) {
         User user = new User();
-        user.setId(user.getId());
+        user.setId(userDto.getId());
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
         return user;
@@ -23,7 +23,7 @@ public class UserMapper {
         );
     }
 
-    public static List<UserDto> mapToItemDto(List<User> users) {
+    public static List<UserDto> mapToUserDtoList(List<User> users) {
         return users.stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
