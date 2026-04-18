@@ -15,4 +15,5 @@ public class CreateItemDto {
     private String description;
     @NotNull(message = "должна быть указана")
     private Boolean available;
+    private Long requestId;
 }
