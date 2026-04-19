@@ -2,12 +2,9 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -27,32 +24,17 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(ConditionsNotMetException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConditionsNotMetException(final ConditionsNotMetException e) {
         log.warn("Условия не выполнены: {}", e.getMessage());
         return new ErrorResponse("error", e.getMessage());
     }
 
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        log.warn("Ошибка валидации: {}", e.getMessage());
-        return new ErrorResponse("Ошибка валидации", e.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        String errorMessage = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> {
-                    String field = error.getField();
-                    String message = error.getDefaultMessage();
-                    return field + ": " + message;
-                })
-                .collect(Collectors.joining("; "));
-
-        log.warn("Ошибка валидации входных данных: {}", errorMessage);
-        return new ErrorResponse("Ошибка валидации входных данных", errorMessage);
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbiddenException(final ForbiddenException e) {
+        log.warn("Доступ запрещён: {}", e.getMessage());
+        return new ErrorResponse("error", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

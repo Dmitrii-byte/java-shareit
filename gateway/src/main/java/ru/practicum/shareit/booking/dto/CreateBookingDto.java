@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -21,4 +22,9 @@ public class CreateBookingDto {
     @NotNull(message = "Дата окончания обязательна")
     @Future(message = "Дата окончания должна быть в будущем")
     private LocalDateTime end;
+
+    @AssertTrue(message = "Дата окончания должна быть позже даты начала")
+    public boolean isEndAfterStart() {
+        return start != null && end != null && end.isAfter(start);
+    }
 }

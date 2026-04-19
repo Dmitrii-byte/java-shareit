@@ -6,8 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.ConditionsNotMetException;
+import ru.practicum.shareit.exception.ForbiddenException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -34,13 +35,10 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         if (bookerId == item.getOwner().getId()) {
-            throw new ValidationException("Нельзя бронировать свою вещь");
+            throw new ConditionsNotMetException("Нельзя бронировать свою вещь");
         }
         if (Boolean.FALSE.equals(item.getAvailable())) {
-            throw new ValidationException("Вещь недоступна для бронирования");
-        }
-        if (!dto.getEnd().isAfter(dto.getStart())) {
-            throw new ValidationException("Дата окончания должна быть позже даты начала");
+            throw new ConditionsNotMetException("Вещь недоступна для бронирования");
         }
 
         Booking booking = BookingMapper.mapToBooking(dto, item, booker);
@@ -53,10 +51,10 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException("Только владелец может подтверждать/отклонять бронирование");
+            throw new ForbiddenException("Только владелец может подтверждать/отклонять бронирование");
         }
         if (booking.getStatus() != Status.WAITING) {
-            throw new ValidationException("Статус уже изменён");
+            throw new ConditionsNotMetException("Статус уже изменён");
         }
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
@@ -71,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
         Long bookerId = booking.getBooker().getId();
 
         if (!userId.equals(ownerId) && !userId.equals(bookerId)) {
-            throw new ValidationException("Доступ запрещён");
+            throw new ForbiddenException("Доступ запрещён");
         }
 
         return BookingMapper.mapToBookingDto(booking);
@@ -119,7 +117,7 @@ public class BookingServiceImpl implements BookingService {
                     .filter(b -> b.getStatus() == Status.REJECTED || b.getStatus() == Status.CANCELED)
                     .map(BookingMapper::mapToBookingDto)
                     .toList();
-            default -> throw new ValidationException("Unknown state: " + stateParam);
+            default -> throw new ConditionsNotMetException("Unknown state: " + stateParam);
         };
     }
 }

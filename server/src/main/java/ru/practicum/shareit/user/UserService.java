@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.dto.UserDtoUpdate;
 import java.util.List;
 import java.util.Optional;
 
-interface UserService {
+public interface UserService {
     List<UserDto> getAllUsers();
 
     Optional<UserDto> getUserById(long id);

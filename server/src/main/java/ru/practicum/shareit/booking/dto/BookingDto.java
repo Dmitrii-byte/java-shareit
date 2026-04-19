@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class BookingDto {
     private Long id;
     private LocalDateTime start;
